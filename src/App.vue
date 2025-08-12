@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<!-- C				<!-- Floating Controls Removed -->
+		<!-- Floating				<!-- Floating Controls Removed --> -->
 		<main class="main-content">
 			<!-- Map View -->
 			<div class="map-content">
@@ -35,7 +35,7 @@
 					<!-- Instruction Overlay -->
 					<div v-if="!mapLoading && !mapError" class="instruction-overlay">
 						<div class="instruction-content">
-							📋 Tap the small icon in the upper left to see location list
+							[LIST] Tap the small icon in the upper left to see location list
 						</div>
 					</div>
 				</div>
@@ -90,28 +90,6 @@
 
 	const openInGoogleMaps = () => {
 		window.open(mapViewerUrl, '_blank');
-	};
-
-	const shareLocation = async () => {
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					title: 'Prairie Creek Redwoods Guide',
-					text: 'Check out this guide for camping, swimming, and hiking in Prairie Creek Redwoods!',
-					url: shareUrl.value,
-				});
-			} catch (err) {
-				console.log('Error sharing:', err);
-			}
-		} else {
-			// Fallback: copy to clipboard
-			try {
-				await navigator.clipboard.writeText(shareUrl.value);
-				alert('Link copied to clipboard!');
-			} catch (err) {
-				console.log('Could not copy to clipboard');
-			}
-		}
 	};
 
 	// Lifecycle
