@@ -9,8 +9,11 @@ export default defineConfig({
 		vue(),
 		VitePWA({
 			registerType: 'autoUpdate',
+			base: '/prairie-creek-redwoods-pwa/',
+			scope: '/prairie-creek-redwoods-pwa/',
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+				globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+				navigateFallback: '/prairie-creek-redwoods-pwa/index.html',
 			},
 			manifest: {
 				name: 'Prairie Creek Redwoods Guide',
@@ -19,14 +22,16 @@ export default defineConfig({
 				theme_color: '#2d5016',
 				background_color: '#f5f5f5',
 				display: 'standalone',
+				start_url: '/prairie-creek-redwoods-pwa/',
 				icons: [
 					{
 						src: '/prairie-creek-redwoods-pwa/vite.svg',
-						sizes: '512x512',
-						type: 'image/svg+xml'
-					}
-				]
-			}
-		})
+						sizes: '192x192',
+						type: 'image/svg+xml',
+						purpose: 'any maskable',
+					},
+				],
+			},
+		}),
 	],
 });
