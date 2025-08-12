@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<!-- Floating				<!-- Floating Controls Removed --> -->
+		<!-- Floating Controls Removed -->
 		<main class="main-content">
 			<!-- Map View -->
 			<div class="map-content">
