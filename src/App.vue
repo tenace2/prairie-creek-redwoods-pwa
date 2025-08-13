@@ -94,10 +94,7 @@
 
 	// Lifecycle
 	onMounted(() => {
-		// Register service worker for PWA
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/sw.js');
-		}
+		// PWA service worker registration removed
 	});
 </script>
 
