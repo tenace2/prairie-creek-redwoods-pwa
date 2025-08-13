@@ -13,6 +13,8 @@
 						allowfullscreen=""
 						loading="lazy"
 						referrerpolicy="no-referrer-when-downgrade"
+						allow="geolocation; fullscreen"
+						sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
 						@load="onMapLoad"
 						@error="onMapError"
 					>
@@ -26,7 +28,11 @@
 
 					<!-- Error state -->
 					<div v-if="mapError" class="map-error">
-						<p>🗺️ Unable to load map</p>
+						<p v-if="isIOS">🍎 iOS detected</p>
+						<p v-else>🗺️ Unable to load map</p>
+						<p v-if="isIOS" class="ios-help">
+							Tap below to open in Google Maps app
+						</p>
 						<button @click="openInGoogleMaps" class="retry-button">
 							Open in Google Maps
 						</button>
@@ -68,12 +74,21 @@
 	// Reactive data
 	const mapLoading = ref(true);
 	const mapError = ref(false);
+	const isIOS = ref(false);
 
 	// Your original map data
 	const mapEmbedUrl =
 		'https://www.google.com/maps/d/embed?mid=1qtuAAYN6KZN2R0icCPuKFGhFIDZVol8&ll=41.299438526476706%2C-124.0400706491881&z=12';
 	const mapViewerUrl =
 		'https://www.google.com/maps/d/u/0/viewer?mid=1qtuAAYN6KZN2R0icCPuKFGhFIDZVol8&ll=41.299438526476706%2C-124.0400706491881&z=12';
+
+	// Detect iOS
+	const detectIOS = () => {
+		return (
+			/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+			(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+		);
+	};
 
 	// Computed properties
 	const shareUrl = computed(() => window.location.href);
@@ -92,9 +107,35 @@
 		window.open(mapViewerUrl, '_blank');
 	};
 
+	const shareLocation = () => {
+		if (navigator.share) {
+			navigator.share({
+				title: '🌲 Prairie Creek Redwoods Guide',
+				text: 'Check out this mobile guide to Prairie Creek Redwoods State Park!',
+				url: shareUrl.value,
+			});
+		} else {
+			// Fallback: copy to clipboard
+			navigator.clipboard.writeText(shareUrl.value).then(() => {
+				alert('Link copied to clipboard!');
+			});
+		}
+	};
+
 	// Lifecycle
 	onMounted(() => {
-		// PWA service worker registration removed
+		// Detect iOS
+		isIOS.value = detectIOS();
+
+		// On iOS, set a timeout to show error state if iframe doesn't load
+		if (isIOS.value) {
+			setTimeout(() => {
+				if (mapLoading.value) {
+					console.log('iOS iframe timeout - showing fallback');
+					onMapError();
+				}
+			}, 5000); // 5 second timeout for iOS
+		}
 	});
 </script>
 
@@ -180,6 +221,13 @@
 		cursor: pointer;
 		font-size: 0.9rem;
 		transition: all 0.3s ease;
+	}
+
+	.ios-help {
+		font-size: 0.85rem;
+		color: #666;
+		margin: 0.5rem 0;
+		text-align: center;
 	}
 
 	.retry-button:hover {
