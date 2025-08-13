@@ -10,11 +10,9 @@
 						width="100%"
 						height="100%"
 						style="border: 0"
-						allowfullscreen=""
+						allowfullscreen
 						loading="lazy"
 						referrerpolicy="no-referrer-when-downgrade"
-						allow="geolocation; fullscreen"
-						sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
 						@load="onMapLoad"
 						@error="onMapError"
 					>
@@ -28,14 +26,20 @@
 
 					<!-- Error state -->
 					<div v-if="mapError" class="map-error">
-						<p v-if="isIOS">🍎 iOS detected</p>
-						<p v-else>🗺️ Unable to load map</p>
-						<p v-if="isIOS" class="ios-help">
-							Tap below to open in Google Maps app
+						<div class="error-icon">🗺️</div>
+						<h3>Map Loading Restricted</h3>
+						<p v-if="isIOS" class="error-explanation">
+							iOS security settings are blocking the embedded map.
 						</p>
-						<button @click="openInGoogleMaps" class="retry-button">
-							Open in Google Maps
+						<p v-else class="error-explanation">
+							Your browser security settings are blocking the embedded map.
+						</p>
+						<button @click="openInGoogleMaps" class="open-maps-button">
+							🌲 Open in Google Maps
 						</button>
+						<p class="fallback-note">
+							This will open the full interactive map with all locations
+						</p>
 					</div>
 
 					<!-- Instruction Overlay -->
@@ -127,15 +131,14 @@
 		// Detect iOS
 		isIOS.value = detectIOS();
 
-		// On iOS, set a timeout to show error state if iframe doesn't load
-		if (isIOS.value) {
-			setTimeout(() => {
-				if (mapLoading.value) {
-					console.log('iOS iframe timeout - showing fallback');
-					onMapError();
-				}
-			}, 5000); // 5 second timeout for iOS
-		}
+		// Set a timeout to show error state if iframe doesn't load
+		// This handles X-Frame-Options blocks, iOS restrictions, and incognito mode issues
+		setTimeout(() => {
+			if (mapLoading.value) {
+				console.log('Iframe failed to load - showing fallback (X-Frame-Options or security restriction)');
+				onMapError();
+			}
+		}, 3000); // 3 second timeout for all devices
 	});
 </script>
 
@@ -221,6 +224,52 @@
 		cursor: pointer;
 		font-size: 0.9rem;
 		transition: all 0.3s ease;
+	}
+
+	.error-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.map-error h3 {
+		color: var(--primary-color);
+		margin: 0 0 1rem 0;
+		font-size: 1.4rem;
+		text-align: center;
+	}
+
+	.error-explanation {
+		color: #666;
+		text-align: center;
+		margin: 0 0 1.5rem 0;
+		font-size: 0.95rem;
+		line-height: 1.4;
+	}
+
+	.open-maps-button {
+		padding: 1rem 2rem;
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: var(--border-radius);
+		font-size: 1.1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		margin-bottom: 1rem;
+	}
+
+	.open-maps-button:hover {
+		background: var(--secondary-color);
+		transform: translateY(-1px);
+	}
+
+	.fallback-note {
+		font-size: 0.8rem;
+		color: #888;
+		text-align: center;
+		margin: 0;
+		max-width: 250px;
 	}
 
 	.ios-help {
